@@ -84,23 +84,17 @@ async function createHybridDesktopSession(signal: AbortSignal) {
 		url: await createSessionRequestUrl(localCallback.port, "desktop"),
 		complete: async () => {
 			const result = await Promise.race([
-				deepLink.complete.then((data) => ({
-					source: "deep-link" as const,
-					data,
-				})),
-				localCallback.complete.then((data) => ({
-					source: "local" as const,
-					data,
-				})),
+				deepLink.complete,
+				localCallback.complete,
 			]);
 
 			await deepLink.dispose();
 			await localCallback.dispose();
 
-			if (!result.data) return null;
+			if (!result) return null;
 			if (signal.aborted) throw new Error("Sign in aborted");
 
-			return result.data;
+			return result;
 		},
 	};
 }
